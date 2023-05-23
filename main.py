@@ -8,12 +8,18 @@ from services import azure
 app = FastAPI()
 
 class Event(BaseModel):
+    """
+    Se especifica los datos que se recibiran en el json de la peticion
+    """
     date: float  # Fecha UTC del evento
     base64_image: str  # Imagen en formato base64
     camera_id: int  # ID de la cámara
 
 @app.post("/")
 async def post_image(event: Event, background_tasks: BackgroundTasks):
+    """
+    Se toma el evento recibido por el usuario, y se envia a un proceso interno, donde se sube la imagen a azure y se guarda en base de datos
+    """
     try: 
 
         background_tasks.add_task(azure.upload_azure_storage,event)

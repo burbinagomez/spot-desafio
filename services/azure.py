@@ -6,6 +6,17 @@ from db import Image
 
    
 def upload_azure_storage(event):
+    """
+    Este metodo se encarga de subir una imagen a azure storage y no retorna nada
+    Parametros:
+        - event: dict
+            {
+            "date": float,
+            "camera_id": int,
+            "base64_image": str
+            }
+    
+    """
     # Configurar la conexión con Azure Storage
     blob_service_client = BlobServiceClient(account_url=f"https://{IMAGE_NAME}.blob.core.windows.net/",
                                            credential=ACCESS_KEY)
@@ -23,5 +34,3 @@ def upload_azure_storage(event):
         "camera_id":event.camera_id,
         "image_url": blob_client.url
     })
-
-    return blob_client.url
