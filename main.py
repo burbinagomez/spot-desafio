@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 import asyncio
 from db import Image, create_tables
@@ -13,10 +13,10 @@ class Event(BaseModel):
     camera_id: int  # ID de la cámara
 
 @app.post("/")
-async def post_image(event: Event):
+async def post_image(event: Event, background_tasks: BackgroundTasks):
     try: 
 
-        await azure.save_file_azure_storage(event)
+        background_tasks.add_task(azure.upload_azure_storage,event)
 
         return {"message": "Evento procesado correctamente"}
     except Exception as e:

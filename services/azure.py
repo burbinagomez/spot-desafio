@@ -1,13 +1,11 @@
-from azure.storage.blob import BlobServiceClient, ContainerClient
+from azure.storage.blob import BlobServiceClient
 import base64
-import concurrent.futures
-import asyncio
 import uuid
 from config import ACCESS_KEY,CONTAINER_NAME,IMAGE_NAME
 from db import Image
 
    
-def guardar_imagen_en_azure_storage(event):
+def upload_azure_storage(event):
     # Configurar la conexión con Azure Storage
     blob_service_client = BlobServiceClient(account_url=f"https://{IMAGE_NAME}.blob.core.windows.net/",
                                            credential=ACCESS_KEY)
@@ -20,19 +18,10 @@ def guardar_imagen_en_azure_storage(event):
     blob_client = container_client.get_blob_client(f"{uuid.uuid1()}.jpg")
     blob_client.upload_blob(imagen_binaria, overwrite=True)
     # Guardar la información en la base de datos SQLite
-    image = Image.create(**{
+    Image.create(**{
         "date": event.date,
         "camera_id":event.camera_id,
         "image_url": blob_client.url
     })
 
     return blob_client.url
-
-async def save_file_azure_storage(event):
-    loop = asyncio.get_running_loop()
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(guardar_imagen_en_azure_storage, event)
-        wrapped_future = asyncio.wrap_future(future)
-        url_imagen = await wrapped_future
-
-    return url_imagen
